@@ -1,0 +1,30 @@
+{
+  "name": "color-pattern-finder",
+  "version": "1.0.0",
+  "description": "This module is designed to classify items by their color and pattern through processing the images of the aforementioned.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "test",
+    "find-test": "ItemColorDetection.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "/color-and-pattern-finder"
+  },
+  "keywords": [
+    "color",
+    "pattern"
+  ],
+  "author": "Kukin Pavel",
+  "license": "ISC",
+  "dependencies": {
+    "opencv4nodejs": "^5.5.0"
+  },
+  "devDependencies": {
+    "express": "^4.17.1",
+    "https": "^1.0.0",
+    "node-fetch": "^2.6.0",
+    "request": "^2.88.2"
+  }
+}
