@@ -10,6 +10,7 @@ class ColorFinder {
     constructor(image) {
         this.image = image;
         this.posteurisedImage = new cv.Mat();
+        this.posteurisedImageWithTops = new cv.Mat();
         this.topColors = new Array(TOP_COLORS_AMOUNT).fill(0);
         this.patterns = [];
         // array of "125" elements, all possible colors after pasteurization
@@ -90,8 +91,9 @@ class ColorFinder {
                 1
             );
         }
-        cv.imshow('rgb image', image);
-        cv.waitKey();
+        //cv.imshow('rgb image', image);
+        this.posteurisedImageWithTops = image;
+        //cv.waitKey();
     }
 }
 
