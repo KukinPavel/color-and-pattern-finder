@@ -1,8 +1,10 @@
 const cv = require('opencv4nodejs');
 const TOP_COLORS_AMOUNT = 10;
-const MAX_IMG_RESOLUTION = 300;
+const MAX_IMG_RESOLUTION = 400;
 const BLACK = new cv.Vec3(0, 0, 0);
-const RED = new cv.Vec3(0, 0, 255);;
+const RED = new cv.Vec3(0, 0, 255);
+
+
 /*
 * This class designed to find top-colors of image
 * */
@@ -56,44 +58,48 @@ class ColorFinder {
         }
     }
 
-    // draw image with `n` top colors
-    drawImageWithTopColors(n) {
-        let image = this.posteurisedImage;
-        let width = 0.15*this.image.cols;
-        let height = (n/100)*this.image.cols;;
+    // draw image with `n` top colors and same it to `dir`
+    saveImageWithTopColors(n, directory) {
+        let image = this.image;
+        let width = 0.15 * this.image.cols;
+        let height = (n / 100) * this.image.cols;
+        ;
         for (let i = 0; i < n; i++) {
             let currentTopColor = new cv.Vec3(this.topColors[i][0], this.topColors[i][1], this.topColors[i][2]);
             // filled color tile
             image.drawRectangle(
-                new cv.Point2(0, i*height),
-                new cv.Point2(width, (i+1)*height),// this.arrayOfPosterColors[getIndexByColor(currentTopColor)]
+                new cv.Point2(0, i * height),
+                new cv.Point2(width, (i + 1) * height),// this.arrayOfPosterColors[getIndexByColor(currentTopColor)]
                 new cv.Vec3(this.topColors[i][0], this.topColors[i][1], this.topColors[i][2]),
                 -1,
                 1
             );
             // border
             image.drawRectangle(
-                new cv.Point2(0, i*height),
-                new cv.Point2(width, (i+1)*height),
+                new cv.Point2(0, i * height),
+                new cv.Point2(width, (i + 1) * height),
                 BLACK,
                 1
             );
             // text
             image.putText(this.arrayOfPosterColors[getIndexByColor(this.topColors[i])].toString(),
-                new cv.Point(width, i*height+30), cv.FONT_HERSHEY_SIMPLEX, 0.5, BLACK, 1, cv.LINE_4);
+                new cv.Point(width, i * height + height), cv.FONT_HERSHEY_SIMPLEX, 0.5, BLACK, 1, cv.LINE_4);
             // level of color amount
             let level = width * (this.arrayOfPosterColors[getIndexByColor(this.topColors[i])] / this.arrayOfPosterColors[getIndexByColor(this.topColors[0])]);
             image.drawRectangle(
-                new cv.Point2(0, i*height),
-                new cv.Point2(level, (i)*height + 5),
+                new cv.Point2(0, i * height),
+                new cv.Point2(level, (i) * height + 5),
                 RED,
                 -1,
                 1
             );
         }
-        //cv.imshow('rgb image', image);
+        let posteurised = this.posteurisedImage;
+        posteurised = posteurised.resizeToMax(MAX_IMG_RESOLUTION / 2 | 0);
+        image = image.resizeToMax(MAX_IMG_RESOLUTION);
+        posteurised.copyTo(image.getRegion(new cv.Rect(posteurised.cols, posteurised.rows, posteurised.cols, posteurised.rows)));
+        cv.imwrite(directory, image);
         this.posteurisedImageWithTops = image;
-        //cv.waitKey();
     }
 }
 
@@ -138,5 +144,3 @@ module.exports.getColorByIndex = getColorByIndex;
 module.exports.indexOfMax = indexOfMax;
 module.exports.getIndexByColor = getIndexByColor;
 module.exports.ColorFinder = ColorFinder;
-
-//module.exports = ColorFinder;

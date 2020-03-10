@@ -1,13 +1,11 @@
 const fetch = require("node-fetch");
-var fs = require('fs');
-var https = require('https');
+let fs = require('fs');
+let https = require('https');
 const cv = require('opencv4nodejs');
 const ColorFinder = require("./ColorFinder");
-//const foobar = import("./ColorFinder.mjs");
-//require {ColorFinder, getIndexByColor, getColorByIndex, indexOfMax} from "./ColorFinder.js";
+const MAX_IMG_RESOLUTION = 400;
 
-
-const url = "https://service.findologic.com/ps/frontend/index.php?outputAdapter=JSON_1.0&outputAttrib[]=cat";
+const url = "https://service.findologic.com/ps/frontend/index.php?outputAdapter=JSON_1.0&outputAttrib[]=cat&query=&count=20";
 // fetches response
 const getData = async url => {
     try {
@@ -41,22 +39,30 @@ const saveImageToDisk = async (url, localPath) => {
 
 // This function fetches image, saves it and shows the pasteurised with top colors on it
 async function fetchAndDetect(imageURL, id, cat, shopkey) {
-    const s = await saveImageToDisk(imageURL, `./${shopkey}/${cat}/${id}.png`);
+    // make directory if not exist
+    const dir = await (async function () {
+        let dir = `./${shopkey}`;
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir);
+        }
+        if (!fs.existsSync(`${dir}/${cat}`)) {
+            fs.mkdirSync(`${dir}/${cat}`);
+        }
+        return dir = `${dir}/${cat}/${id}.png`;
+    })(id, cat, shopkey);
+    const s = await saveImageToDisk(imageURL, dir);
     await (async function (s) {
-        let img = cv.imread(`./${shopkey}/${cat}/${id}.png`);
+        let img = cv.imread(dir);
         let finder = new ColorFinder.ColorFinder(img);
-        finder.pasteurise(300);
+        finder.pasteurise(MAX_IMG_RESOLUTION);
         finder.getTopColorsFromArray();
-        finder.drawImageWithTopColors(5);
-        cv.imwrite(`./${shopkey}/${cat}/${id}_.png`, mat);
-        return 1;
+        finder.saveImageWithTopColors(5, dir);
+        //return 1;
     })();
 }
 
-async function fetchResponseAndProcessEachImage(url) {
-    const shopkey = '30C0586DD71B5F008C32511B4C7E934C';
-    const cat = 'Damen';
-    url = url + `&shopkey=${shopkey}&attrib[cat][]=${cat}&query=es&count=10`;
+async function fetchResponseAndProcessEachImage(url, shopkey, cat) {
+    url = url + `&shopkey=${shopkey}&attrib[cat][]=${cat}`;
     const result = await getData(url)
         .then(response => {
             return response.result;
@@ -70,7 +76,7 @@ async function fetchResponseAndProcessEachImage(url) {
         });
 }
 
-let results = fetchResponseAndProcessEachImage(url);
+let results = fetchResponseAndProcessEachImage(url, '30C0586DD71B5F008C32511B4C7E934C', 'Home');
 
 
 
